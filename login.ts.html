@@ -1,0 +1,250 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> login.ts</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Classes</h3><ul><li><a href="AA4AMBranchArguments.html">AA4AMBranchArguments</a></li><li><a href="AA4AMCommand.html">AA4AMCommand</a></li><li><a href="CoeCliCommands.html">CoeCliCommands</a></li><li><a href="DevOpsBranchArguments.html">DevOpsBranchArguments</a></li><li><a href="DevOpsCommand.html">DevOpsCommand</a></li><li><a href="LoginArguments.html">LoginArguments</a></li><li><a href="LoginCommand.html">LoginCommand</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>login.ts</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>"use strict";
+import { PublicClientApplication, DeviceCodeRequest, AuthenticationResult, Configuration } from '@azure/msal-node';
+import { DeviceCodeResponse } from "@azure/msal-common";
+import * as path from 'path'
+import * as fs from 'fs';
+import { promisify } from 'util';
+
+const readFile = promisify(fs.readFile);
+
+/**
+ * Login Arguments
+ */
+class LoginArguments {
+    /**
+     * The configuration file to read from
+     */
+    configFile : string
+
+    /**
+     * The Azure Active directory client id to authenticate with 
+     */
+    clientId : string
+
+    /**
+     * The Azure Active Directory authorization url
+     */
+    auth : string
+}
+
+ /**
+ * Azure Active Directory Login Commands
+ */
+class LoginCommand {
+    accessToken: string;
+    createClientApp: (config: any) => PublicClientApplication
+
+    constructor() {
+        this.createClientApp = (config) => {
+            return new PublicClientApplication(&lt;Configuration>config)
+        } 
+    }
+
+    /**
+     * Login to Azure DevOps
+     *
+     * @param args {LoginArguments} - The login arguments
+     * @return {Promise} aync outcome
+     *
+     */
+    async execute(args: LoginArguments) : Promise&lt;void | AuthenticationResult> {
+        var config : any = undefined
+        
+        if (args?.configFile?.length > 0) {
+            let configFile = path.isAbsolute(args?.configFile) ? args?.configFile :path.join(process.cwd(), args?.configFile)
+            let json : string = await readFile(configFile, 'utf8');
+            config = &lt;Configuration>JSON.parse(json);
+        }
+
+        if ( typeof config === "undefined" ) {
+            let clientId: string = args.clientId
+            config = {
+                "authOptions":
+                {
+                    "clientId": clientId,
+                    "authority": "https://login.microsoftonline.com/common/"
+                },
+                "request":
+                {
+                    "deviceCodeUrlParameters": {
+                        "scopes": ["499b84ac-1321-427f-aa17-267ca6975798/user_impersonation"]
+                    }
+                },
+                "resourceApi":
+                {
+                    "endpoint": "https://dev.azure.com"
+                }
+            }
+        }
+
+        // Build MSAL Client Configuration from scenario configuration file
+        const clientConfig = {
+            auth: config.authOptions
+        };
+
+        var self = this
+
+        const pca =  this.createClientApp(clientConfig)
+
+        let runtimeOptions: any
+
+        if (!runtimeOptions) {
+             runtimeOptions = {
+                 deviceCodeCallback: (response: DeviceCodeResponse) => console.log(response.message)
+             }
+        }
+    
+        let deviceCodeRequest: DeviceCodeRequest = &lt;DeviceCodeRequest>{
+            ...config.request.deviceCodeUrlParameters,
+            deviceCodeCallback: (response: DeviceCodeResponse) => console.log(response.message)
+        }
+
+        // Check if a timeout was provided at runtime.
+        if (runtimeOptions?.timeout) {
+             deviceCodeRequest.timeout = runtimeOptions.timeout;
+        }
+    
+        /**
+         * MSAL Usage
+         * The code below demonstrates the correct usage pattern of the ClientApplicaiton.acquireTokenByDeviceCode API.
+         * 
+         * Device Code Grant
+         * 
+         * In this code block, the application uses MSAL to obtain an Access Token through the Device Code grant.
+         * Once the device code request is executed, the user will be prompted by the console application to visit a URL,
+         * where they will input the device code shown in the console. Once the code is entered, the promise below should resolve
+         * with an AuthenticationResult object.
+         * 
+         * The AuthenticationResult contains an `accessToken` property. Said property contains a string representing an encoded Json Web Token
+         * which can be added to the `Authorization` header in a protected resource request to demonstrate authorization.
+         */
+        return await pca.acquireTokenByDeviceCode(deviceCodeRequest)
+        .then((response) => {
+            self.accessToken = response.accessToken
+            return response;
+        }).catch((error) => {
+            console.log(error)
+            return error;
+        });
+    }
+}
+
+export { 
+    LoginArguments,
+    LoginCommand
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+</body>
+</html>

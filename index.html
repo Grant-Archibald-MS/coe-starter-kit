@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> Home</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Classes</h3><ul><li><a href="AA4AMBranchArguments.html">AA4AMBranchArguments</a></li><li><a href="AA4AMCommand.html">AA4AMCommand</a></li><li><a href="CoeCliCommands.html">CoeCliCommands</a></li><li><a href="DevOpsBranchArguments.html">DevOpsBranchArguments</a></li><li><a href="DevOpsCommand.html">DevOpsCommand</a></li><li><a href="LoginArguments.html">LoginArguments</a></li><li><a href="LoginCommand.html">LoginCommand</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p></p>
+                    <h1>Home</h1>
+                </header>
+                
+
+
+
+    
+
+
+    <h3> </h3>
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    <section>
+        <article><h1>Overview</h1>
+<p>The Center of Excellence (COE) toolkit command line interface (CLI) provide common functionality to automate the installation and operate solutions within a COE environment.</p>
+<h2>Prerequisites</h2>
+<p>To run the COE CLI application you will require the following</p>
+<ol>
+<li>An installation of Node for versions (10, 12, 14, 16)</li>
+</ol>
+<h2>Installation</h2>
+<h3>Via NPM</h3>
+<pre class="prettyprint source lang-bash"><code>npm install -g @pp-coe/coe-cli
+</code></pre>
+<h2>Via Source Control</h2>
+<ol>
+<li>
+<p>Download or clone repository</p>
+</li>
+<li>
+<p>Change to unzipped or cloned repository</p>
+</li>
+<li>
+<p>Install application dependencies</p>
+</li>
+</ol>
+<pre class="prettyprint source"><code>npm install
+</code></pre>
+<ol>
+<li>Build the application</li>
+</ol>
+<pre class="prettyprint source"><code>npm run build
+</code></pre>
+<ol>
+<li>Link to the CLI application</li>
+</ol>
+<pre class="prettyprint source"><code>npm link
+</code></pre>
+<h2>Getting Started</h2>
+<p>Once installed can use -h argument to se help options</p>
+<pre class="prettyprint source"><code>coe -h
+</code></pre>
+<h2>Technical Details</h2>
+<p>The COE command line application makes use of following components</p>
+<ol>
+<li>Node JS to provide cross platform support</li>
+<li>TypeScript to leverage published type definitions for dependent components</li>
+<li>Jest for unit tests.</li>
+</ol>
+<h3>Key NPM Scripts</h3>
+<ol>
+<li>Run unit tests</li>
+</ol>
+<pre class="prettyprint source"><code>npm run test
+</code></pre>
+<ol>
+<li>Run development version</li>
+</ol>
+<pre class="prettyprint source"><code>npm run start
+</code></pre>
+<ol>
+<li>Build production version</li>
+</ol>
+<pre class="prettyprint source"><code>npm run prod
+</code></pre>
+<h2>Possible Roadmap</h2>
+<p>This command line interface is investigating the following areas for implementation</p>
+<p>coe tooklkit
+install -type all
+install -type aad
+install -type environment</p>
+<p>coe aa4am
+install -type all
+install -type aad
+install -type environment
+install -type devops</p>
+<pre><code>branch
+</code></pre>
+<p>coe portal</p></article>
+    </section>
+
+
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+</body>
+</html>

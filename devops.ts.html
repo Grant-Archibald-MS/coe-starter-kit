@@ -1,0 +1,269 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> devops.ts</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Classes</h3><ul><li><a href="AA4AMBranchArguments.html">AA4AMBranchArguments</a></li><li><a href="AA4AMCommand.html">AA4AMCommand</a></li><li><a href="CoeCliCommands.html">CoeCliCommands</a></li><li><a href="DevOpsBranchArguments.html">DevOpsBranchArguments</a></li><li><a href="DevOpsCommand.html">DevOpsCommand</a></li><li><a href="LoginArguments.html">LoginArguments</a></li><li><a href="LoginCommand.html">LoginCommand</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>devops.ts</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>"use strict";
+import * as azdev from "azure-devops-node-api"
+import { IRequestHandler } from "azure-devops-node-api/interfaces/common/VsoBaseInterfaces";
+import util from "util"
+import { GitRefUpdate, GitCommitRef, GitPush, GitChange, VersionControlChangeType, GitItem, ItemContentType } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import axios from 'axios';
+import { ItemContent } from "azure-devops-node-api/interfaces/TfvcInterfaces";
+
+/**
+ * Branch Arguments
+ */
+class DevOpsBranchArguments {
+    /**
+     * The Bearer Auth access token
+     */
+    accessToken: string
+    /**
+     * The name of the Azure DevOps Organization
+     */
+    organizationName:string
+    /**
+     * The name of repository that the Accelerator has been deployed to or wil lbe deployed to
+     */
+    repositoryName: string
+    /**
+     * The name of the project that the Accelerator has been deployed to
+     */
+    projectName: string
+    /**
+     * The source branch to branch from (Optional). If not defined will use default branch
+     */
+    sourceBranch: string
+
+    /**
+     * The name of the branch to create
+     */
+    destinationBranch: string
+}
+
+ /**
+ * Azure DevOps Commands
+ */
+class DevOpsCommand {
+    createWebApi: (orgUrl: string, authHandler: IRequestHandler) => azdev.WebApi
+    getUrl: (url: string) => Promise&lt;string>
+
+    constructor() {
+        this.createWebApi = (orgUrl: string, authHandler: IRequestHandler) => new azdev.WebApi(orgUrl, authHandler)
+        this.getUrl = async (url: string) => {
+            return (await (axios.get&lt;string>(url))).data
+        }
+    }
+
+    /**
+     * Login to Azure DevOps
+     *
+     * @param args {DevOpsBranchArguments} - The branch request
+     * @return {Promise} aync outcome
+     *
+     */
+    async branch(args: DevOpsBranchArguments) : Promise&lt;void> {
+        let orgUrl = util.format("https://dev.azure.com/%s",args.organizationName);
+        let authHandler = azdev.getBearerHandler(args.accessToken); 
+        let connection = this.createWebApi(orgUrl, authHandler); 
+
+        let core = await connection.getCoreApi()
+        let project = await core.getProject(args.projectName)
+
+        if (typeof project !== "undefined") {
+            console.debug(util.format("Found project %s", project.name))
+
+            let gitApi = await connection.getGitApi()
+            var repos = await gitApi.getRepositories(project.id);
+
+            let foundRepo = false
+            for ( let i = 0; i &lt; repos.length; i++ ) {
+                let repo = repos[i]
+                if ( repo.name == args.repositoryName ) {
+                    foundRepo = true
+                    console.debug(util.format("Found matching %s", args.repositoryName))
+
+                    let refs = await gitApi.getRefs(repo.id, undefined, "heads/");
+
+                    let sourceBranch = args.sourceBranch;
+                    if (typeof sourceBranch === "undefined") {
+                        sourceBranch = repo.defaultBranch
+                    }
+
+                    let sourceRef = refs.filter(f => f.name == util.format("refs/heads/%s", sourceBranch))
+                    if (sourceRef.length == 0) {
+                        console.error("Source branch not found")
+                        return;
+                    }
+
+                    let destinationRef = refs.filter(f => f.name == util.format("refs/heads/%s", args.destinationBranch))
+                    if (destinationRef.length > 0) {
+                        console.error("Destination branch already exists")
+                        return;
+                    }
+
+                    let newRef = &lt;GitRefUpdate> {};
+                    newRef.repositoryId = repo.id
+                    newRef.oldObjectId = sourceRef[0].objectId
+                    newRef.name = util.format("refs/heads/%s", args.destinationBranch)
+
+                    let newGitCommit = &lt;GitCommitRef> {}
+                    newGitCommit.comment = "Add DevOps Pipeline"
+                    newGitCommit.changes = await this.getGitCommitChanges(args.destinationBranch, ['validation', 'test', 'prod'])
+
+                    let gitPush = &lt;GitPush> {}
+                    gitPush.refUpdates = [ newRef ]
+                    gitPush.commits = [ newGitCommit ]
+
+                    await gitApi.createPush(gitPush, repo.id, project.name)
+                }
+            }
+
+            if (!foundRepo &amp;&amp; args.repositoryName?.length > 0 ) {
+                console.debug(util.format("Repo %s not found", args.repositoryName))
+                console.debug('Did you mean?')
+                repos.forEach( repo => {
+                    if ( repo.name.startsWith(args.repositoryName[0]) ) {
+                        console.debug(repo.name)
+                    }
+                });
+            }
+        }
+    }
+
+    async getGitCommitChanges(destinationBranch: string, names: string[]): Promise&lt;GitChange[]> {
+        let results : GitChange[] = []
+        for ( let i = 0; i &lt; names.length; i++ ) {
+            let url = util.format("https://raw.githubusercontent.com/microsoft/coe-alm-accelerator-templates/main/Pipelines/build-deploy-%s-SampleSolution.yml", names[i]);
+            
+            let response = await this.getUrl(url)
+
+            let commit = &lt;GitChange>{}
+            commit.changeType = VersionControlChangeType.Add
+            commit.item = &lt;GitItem>{}
+            commit.item.path = util.format("/%s/deploy-%s-%s.yml", destinationBranch, names[i], destinationBranch)
+            commit.newContent = &lt;ItemContent>{}
+            commit.newContent.content = (response)?.replace(new RegExp('SampleSolutionName'), destinationBranch)
+            commit.newContent.contentType = ItemContentType.RawText
+
+            results.push(commit)
+        }
+        return results;
+    }
+}
+
+export { 
+    DevOpsBranchArguments,
+    DevOpsCommand 
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+</body>
+</html>
